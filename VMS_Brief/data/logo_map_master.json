@@ -1,0 +1,42 @@
+{
+  "petroleo_gas": [
+    "baker-hughes",
+    "pemex",
+    "slb",
+    "cotemar",
+    "saipem",
+    "blue-marine",
+    "geolis",
+    "grupo-protexa",
+    "ros",
+    "alkhorayef",
+    "weatherford"
+  ],
+  "mineria": [
+    "cemento-cruz-azul",
+    "cemex",
+    "holcim",
+    "imerys"
+  ],
+  "energia": [
+    "cfe-distribucion",
+    "cfe-generacion",
+    "sempra-energy"
+  ],
+  "electronica": [
+    "flextronics"
+  ],
+  "alimentos_bebidas": [
+    "coca-cola",
+    "grupo-modelo",
+    "zucarmex",
+    "grupo-piasa",
+    "beta-san-miguel",
+    "iff"
+  ],
+  "puertos": [],
+  "pulpa_papel": [
+    "westrock",
+    "bio-papel"
+  ]
+}

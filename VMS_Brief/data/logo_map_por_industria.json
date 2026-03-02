@@ -1,0 +1,17 @@
+{
+  "energia": [
+    "cfe-generacion",
+    "cfe-distribucion",
+    "sempra-energy"
+  ],
+  "alimentos_y_bebidas": [
+    "iff"
+  ],
+  "pulpa_y_papel": [
+    "westrock",
+    "bio-papel"
+  ],
+  "electronica": [
+    "flextronics"
+  ]
+}

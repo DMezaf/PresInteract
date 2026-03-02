@@ -1,0 +1,822 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Examen Interactivo VMS Energy (30 x 3)</title>
+  <style>
+    :root{
+      --bg:#f3f6fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#475569;
+      --primary:#0f4c81;
+      --primary-2:#172c51;
+      --ok:#166534;
+      --warn:#b45309;
+      --bad:#991b1b;
+      --line:#dbe5f1;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#eaf0f9 0%,#f8fafc 100%);color:var(--text);font-family:"Roboto Condensed",Tahoma,Arial,sans-serif}
+    .wrap{max-width:980px;margin:0 auto;padding:24px}
+    .head{background:linear-gradient(135deg,var(--primary-2),var(--primary));color:#fff;border-radius:16px;padding:22px 20px;box-shadow:0 12px 30px rgba(23,44,81,.18)}
+    .head h1{margin:0 0 8px;font-size:30px}
+    .head p{margin:0;color:#dbeafe}
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:16px}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .chip{border:1px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:6px 10px;font-weight:700;font-size:13px}
+    .muted{color:var(--muted)}
+    .ok{color:var(--ok)}
+    .warn{color:var(--warn)}
+    .bad{color:var(--bad)}
+    .btn{border:0;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-secondary{background:#e2e8f0;color:#0f172a}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .reg-form{display:grid;gap:10px;margin-top:10px}
+    .field{display:grid;gap:6px}
+    .field label{font-weight:700;color:#0b2a48}
+    .field input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit}
+    .field input:focus{outline:2px solid #bfdbfe;outline-offset:1px;border-color:#93c5fd}
+    form{display:grid;gap:14px;margin-top:14px}
+    fieldset{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
+    legend{font-weight:700;padding:0 6px;color:#0b2a48}
+    .opt{display:flex;gap:8px;align-items:flex-start;padding:5px 0}
+    .opt input{margin-top:3px}
+    .result-list{margin:8px 0 0 18px;color:var(--muted)}
+    .hidden{display:none}
+    @media (max-width:680px){
+      .head h1{font-size:24px}
+      .wrap{padding:14px}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="head">
+      <h1>Examen Interactivo VMS Energy</h1>
+    </section>
+
+    <section class="panel" id="registerPanel">
+      <h2>Registro previo</h2>
+      <p class="muted">Ingresa tu nombre y correo empresarial antes de iniciar el examen.</p>
+      <form id="registerForm" class="reg-form" novalidate>
+        <div class="field">
+          <label for="candidateName">Nombre completo</label>
+          <input id="candidateName" name="candidateName" type="text" placeholder="Ej. Ana Perez" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label for="candidateEmail">Correo empresarial</label>
+          <input id="candidateEmail" name="candidateEmail" type="email" placeholder="Ej. ana@empresa.com" autocomplete="email" required>
+        </div>
+        <div class="row">
+          <button id="registerBtn" class="btn btn-primary" type="submit">Guardar registro</button>
+        </div>
+      </form>
+      <p class="muted" id="registerText">Registro pendiente.</p>
+    </section>
+
+    <section class="panel" id="statusPanel">
+      <div class="row">
+        <span class="chip" id="attemptChip">Oportunidad 0 de 3</span>
+        <span class="chip" id="bankChip">Banco: 0 preguntas</span>
+        <span class="chip" id="usedChip">Usadas: 0</span>
+        <span class="chip" id="participantChip">Participante: sin registro</span>
+      </div>
+      <p class="muted" id="statusText">Pulsa "Iniciar oportunidad" para comenzar.</p>
+      <div class="row">
+        <button id="startBtn" class="btn btn-primary" type="button">Iniciar oportunidad</button>
+        <button id="nextBtn" class="btn btn-secondary hidden" type="button">Siguiente oportunidad</button>
+        <button id="resetBtn" class="btn btn-secondary" type="button">Reiniciar examen</button>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="quizPanel">
+      <h2 id="quizTitle">Preguntas</h2>
+      <form id="quizForm"></form>
+      <div class="row" style="margin-top:12px">
+        <button id="submitBtn" class="btn btn-primary" type="button">Calificar intento</button>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="resultPanel">
+      <h2>Resultado del intento</h2>
+      <p id="resultText"></p>
+      <ul id="resultList" class="result-list"></ul>
+      <div id="historyWrap"></div>
+      <hr style="border:0;border-top:1px solid var(--line);margin:14px 0;">
+      <h3 style="margin:0 0 8px;">Enviar resultados por correo</h3>
+      <p class="muted" id="mailHint">Genera un correo dirigido a <strong>hdiaz@vmsenergy.com</strong> con el resumen del examen.</p>
+      <div class="row">
+        <button id="mailBtn" class="btn btn-primary" type="button">Enviar por mail</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const ATTEMPTS_MAX = 3;
+    const QUESTIONS_PER_ATTEMPT = 30;
+
+    const navLinks = [
+      { text: "Inicio", href: "#inicio" },
+      { text: "Nosotros", href: "#nosotros" },
+      { text: "Soluciones", href: "#servicios" },
+      { text: "Proyectos", href: "#cv-proyectos" },
+      { text: "Suministro", href: "#productos" },
+      { text: "Registro", href: "#contacto" }
+    ];
+
+    const heroMetrics = [
+      "+16 anos en EPC industrial",
+      "MT - AT",
+      "Integracion multimarcas certificada"
+    ];
+
+    const heroAreas = ["Electromecanicos", "Iluminacion", "Infraestructura", "Oil & Gas", "Solar", "Automatizacion"];
+
+    const aboutCards = ["El Desafio", "El Proposito", "La Solucion"];
+
+    const values = [
+      { letter: "V", name: "Verdad", concept: "base de la confianza" },
+      { letter: "M", name: "Motivacion", concept: "cumplir acuerdos con las partes interesadas" },
+      { letter: "S", name: "Salud y Seguridad", concept: "prioridad para ejecutar labores sin exponer a nadie" },
+      { letter: "E", name: "Environment", concept: "conservar el medio ambiente" },
+      { letter: "N", name: "Nobleza", concept: "trato justo y respetuoso" },
+      { letter: "E", name: "Eficiencia", concept: "consumo energetico responsable y reduccion de emisiones" }
+    ];
+
+    const iso = [
+      { norm: "ISO 9001", code: "GSC9KMX505", focus: "excelencia en procesos" },
+      { norm: "ISO 14001", code: "GSC14KMX277", focus: "gestion ambiental" },
+      { norm: "ISO 37001", code: "GSC37KMX131", focus: "antisoborno y transparencia" },
+      { norm: "ISO 45001", code: "GSC45KMX182", focus: "salud y seguridad" },
+      { norm: "ISO 50001", code: "GSC50KMX101", focus: "eficiencia energetica" }
+    ];
+
+    const coreBusiness = [
+      "EPC (diseno, procura y construccion)",
+      "Generacion, transmision y distribucion electrica",
+      "Solucion de desafios electromecanicos",
+      "Automatizacion y control multimarcas",
+      "Infraestructura en redes electricas",
+      "Petroleo y gas",
+      "Iluminacion industrial, vial y arquitectonica",
+      "Energias renovables",
+      "Suministro especializado (MCC, tableros, VFD, reguladores, actuadores, retrofit, cable, luminarias LED, ATEX)"
+    ];
+
+    const nonCoreDistractors = [
+      "Venta exclusiva de software ERP",
+      "Servicios juridicos corporativos",
+      "Produccion de alimentos procesados",
+      "Fabricacion de ropa deportiva",
+      "Turismo y hoteleria",
+      "Desarrollo de videojuegos"
+    ];
+
+    const reachData = {
+      regions: ["Estados Unidos", "Mexico", "Centroamerica", "Caribe"],
+      bullets: [
+        "Respuesta agil para procura y arranques",
+        "Coordinacion multi-sitio",
+        "Gestion de riesgos y seguridad operacional",
+        "Ejecucion de proyectos en plataformas offshore, industria pesada y plantas"
+      ],
+      cities: ["Guadalajara, Jalisco", "Ciudad del Carmen, Campeche"]
+    };
+
+    const differentiators = [
+      "Cumplimiento y seguridad",
+      "Integracion multimarcas",
+      "Ingenieria experta",
+      "Time-to-value"
+    ];
+
+    const serviceCards = [
+      {
+        name: "EPC Electrico",
+        bullets: ["Ingenieria, procura y construccion", "Subestaciones / tableros / protecciones", "Puesta en marcha y pruebas"]
+      },
+      {
+        name: "Automatizacion y Control",
+        bullets: ["PLC / SCADA / instrumentacion", "Arquitecturas OT y comunicaciones", "Integracion, FAT/SAT"]
+      },
+      {
+        name: "Energia Solar Industrial",
+        bullets: ["Diseno, interconexion y EPC", "Tableros, protecciones, medicion", "O&M / monitoreo"]
+      },
+      {
+        name: "Oil & Gas",
+        bullets: ["Electrificacion y modernizaciones", "Ambientes criticos / cumplimiento", "Integracion y confiabilidad"]
+      },
+      {
+        name: "Infraestructura Energetica",
+        bullets: ["Generacion, transmision y distribucion", "Rehabilitaciones / modernizaciones", "Gestion de obra EPC"]
+      },
+      {
+        name: "Iluminacion",
+        bullets: ["Diseno y EPC de iluminacion industrial", "Normativa / fotometria", "Tableros, canalizaciones"]
+      }
+    ];
+
+    const catalogTabs = ["Ingenieria", "Servicios", "Mantenimiento"];
+
+    const projects = [
+      { sector: "Oil & Gas", title: "PEMEX Nohoch-A2 Sistema Electrico y CCM Offshore" },
+      { sector: "Oil & Gas", title: "PEMEX Balam Subestacion y Seccionamiento MT 34.5 kV" },
+      { sector: "Oil & Gas", title: "PEMEX Akal-J Control Electrico" },
+      { sector: "Oil & Gas", title: "PEMEX Ku-Maloob-Zaap Modernizacion de Turbinas de Gas" },
+      { sector: "Oil & Gas", title: "Baker Hughes Variadores Outdoor E-Cabinet" },
+      { sector: "Oil & Gas", title: "SLB Sistema de Bombeo con Variadores MV TRIOL" },
+      { sector: "Infraestructura Electrica", title: "Grupo Dragon Planta Geotermica | Sistema de Generacion y Sincronia" },
+      { sector: "Infraestructura Electrica", title: "CH Angostura Sistemas de Cable de Potencia 400 kV" },
+      { sector: "Infraestructura Electrica", title: "Ingenio Tres Valles Incremento de Capacidad en Subestaciones MT" },
+      { sector: "Infraestructura Electrica", title: "CFE Chankanaab Sistema Electrico Integral CA/CD" },
+      { sector: "Infraestructura Electrica", title: "CFE Tamazulapan - Modernizacion de Control Hidraulico" },
+      { sector: "Infraestructura Electrica", title: "CH Angostura Infraestructura Electrica de Alta Tension 400 kV" },
+      { sector: "Soluciones Industriales", title: "Proyecto Minero VFD Altivar 980 700 HP para Bombeo Profundo" },
+      { sector: "Soluciones Industriales", title: "Coca-Cola Colima Variador Industrial TRIOL 200 HP" },
+      { sector: "Soluciones Industriales", title: "Campo Eolico Suministro de Sistemas de Control y Potencia" },
+      { sector: "Soluciones Industriales", title: "Ingenio Emiliano Zapata Control de Velocidad y Gobernadores" },
+      { sector: "Soluciones Industriales", title: "Ingenio Adolfo Lopez Mateos Sistema de Sincronia y Cogeneracion" },
+      { sector: "Soluciones Industriales", title: "Ingenio Tamazula Variador Regenerativo 300 HP" }
+    ];
+
+    const cvData = {
+      default: { label: "Todas las industrias", electricas: 158, automatizacion: 61, electromecanica: 25, solar: 2 },
+      oilgas: { label: "Oil & Gas", electricas: 74, automatizacion: 48, electromecanica: 19, solar: 1 },
+      energia: { label: "Generacion e Infraestructura Electrica", electricas: 92, automatizacion: 29, electromecanica: 17, solar: 2 },
+      mineria: { label: "Mineria y Metales", electricas: 46, automatizacion: 31, electromecanica: 23, solar: 1 },
+      procesos: { label: "Alimentos, Bebidas y Papel", electricas: 52, automatizacion: 34, electromecanica: 18, solar: 1 },
+      industrial: { label: "Industrial y Manufactura", electricas: 63, automatizacion: 40, electromecanica: 21, solar: 2 },
+      agua: { label: "Agua y Saneamiento", electricas: 38, automatizacion: 27, electromecanica: 15, solar: 1 }
+    };
+
+    function shuffle(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function unique(arr) {
+      return Array.from(new Set(arr));
+    }
+
+    function makeOptions(correct, pool, size = 4) {
+      const cleanPool = unique(pool).filter(v => v !== correct);
+      const opts = [correct];
+      for (const item of shuffle(cleanPool)) {
+        if (opts.length >= size) break;
+        opts.push(item);
+      }
+      while (opts.length < size) {
+        opts.push("Ninguna de las anteriores");
+      }
+      return shuffle(unique(opts)).slice(0, size);
+    }
+
+    function buildQuestionBank() {
+      const qs = [];
+
+      function add(question, options, answer) {
+        const uniqueOptions = unique(options);
+        if (!uniqueOptions.includes(answer) || uniqueOptions.length < 2) return;
+        qs.push({
+          id: "Q" + (qs.length + 1),
+          question,
+          options: shuffle(uniqueOptions),
+          answer
+        });
+      }
+
+      // Navegacion
+      const navTexts = navLinks.map(n => n.text);
+      navLinks.forEach(n => {
+        add(
+          'En el menu principal, \"' + n.text + '\" dirige a:',
+          makeOptions(n.href, navLinks.map(x => x.href).concat(["#faq", "#blog"])),
+          n.href
+        );
+      });
+      navLinks.forEach(n => {
+        add(
+          'Cual de estas etiquetas SI aparece en la navegacion principal?',
+          makeOptions(n.text, navTexts.concat(["Blog", "Tienda", "Noticias"])) ,
+          n.text
+        );
+      });
+
+      // Hero
+      heroMetrics.forEach(m => {
+        add(
+          'Cual de estos textos aparece en las metricas del hero?',
+          makeOptions(m, heroMetrics.concat(["+30 anos en retail", "Baja tension solamente", "Sin certificaciones"])),
+          m
+        );
+      });
+      heroAreas.forEach(area => {
+        add(
+          'Que area aparece en el eyebrow del hero?',
+          makeOptions(area, heroAreas.concat(["Agroexportacion", "Legal", "Finanzas"])),
+          area
+        );
+      });
+      add(
+        'Cual es el texto del CTA primario del hero?',
+        ["Continuar", "Cotizar ahora", "Hablar con ventas", "Descargar brochure"],
+        "Continuar"
+      );
+      add(
+        'Cual es el texto del CTA secundario del hero?',
+        ["Ver soluciones", "Mas informacion", "Abrir catalogo PDF", "Solicitar demo"],
+        "Ver soluciones"
+      );
+
+      // Nosotros y narrativa
+      aboutCards.forEach(card => {
+        add(
+          'Cual de estos bloques forma parte de la seccion Nosotros?',
+          makeOptions(card, aboutCards.concat(["El Presupuesto", "La Franquicia", "El Inventario"])),
+          card
+        );
+      });
+      add(
+        'Segun el acordeon, VMS Energy es una empresa mexicana con mas de:',
+        ["15 anos de experiencia", "5 anos de experiencia", "30 anos de experiencia", "50 anos de experiencia"],
+        "15 anos de experiencia"
+      );
+      add(
+        'En el hero se declara una experiencia de:',
+        ["+16 anos en EPC industrial", "+8 anos en EPC industrial", "+25 anos en EPC industrial", "+3 anos en EPC industrial"],
+        "+16 anos en EPC industrial"
+      );
+
+      // Valores
+      values.forEach(v => {
+        add(
+          'En los valores VMS ENE, la letra \"' + v.letter + '\" se asocia con:',
+          makeOptions(v.name, values.map(x => x.name).concat(["Rentabilidad", "Expansion", "Disrupcion"])),
+          v.name
+        );
+      });
+      values.forEach(v => {
+        add(
+          'Que frase describe mejor el valor \"' + v.name + '\"?',
+          makeOptions(v.concept, values.map(x => x.concept).concat(["Maximizar deuda", "Reducir plantilla sin control", "Evitar auditorias"])),
+          v.concept
+        );
+      });
+
+      // ISO
+      iso.forEach(i => {
+        add(
+          'Que certificado corresponde a ' + i.norm + '?',
+          makeOptions(i.code, iso.map(x => x.code).concat(["GSC00KMX000"])),
+          i.code
+        );
+      });
+      iso.forEach(i => {
+        add(
+          'Que norma ISO corresponde al certificado ' + i.code + '?',
+          makeOptions(i.norm, iso.map(x => x.norm).concat(["ISO 27001", "ISO 22000"])),
+          i.norm
+        );
+      });
+      iso.forEach(i => {
+        add(
+          'En el apartado \"Como lo hacemos\", ' + i.norm + ' se relaciona con:',
+          makeOptions(i.focus, iso.map(x => x.focus).concat(["marketing digital", "expansion internacional"])),
+          i.focus
+        );
+      });
+
+      // Core business
+      coreBusiness.forEach(item => {
+        add(
+          'Cual de estas opciones SI pertenece al Core Business?',
+          makeOptions(item, coreBusiness.concat(nonCoreDistractors)),
+          item
+        );
+      });
+
+      // Alcance
+      reachData.regions.forEach(r => {
+        add(
+          'Que region forma parte del alcance operativo?',
+          makeOptions(r, reachData.regions.concat(["Europa", "Asia Pacifico", "Africa"])),
+          r
+        );
+      });
+      reachData.bullets.forEach(b => {
+        add(
+          'Cual de estos puntos se menciona en \"Nuestro Alcance\"?',
+          makeOptions(b, reachData.bullets.concat(["Franquicias de consumo", "Ventas puerta a puerta", "Publicidad masiva"])),
+          b
+        );
+      });
+      reachData.cities.forEach(c => {
+        add(
+          'Que ubicacion aparece como marcador en el mapa de alcance?',
+          makeOptions(c, reachData.cities.concat(["Monterrey, Nuevo Leon", "Merida, Yucatan"])),
+          c
+        );
+      });
+
+      // Diferenciadores
+      differentiators.forEach(d => {
+        add(
+          'Cual de estos es un diferenciador de VMS Energy?',
+          makeOptions(d, differentiators.concat(["Precio mas bajo garantizado", "Entrega en 24 horas global", "Sin plan de seguridad"])),
+          d
+        );
+      });
+      add(
+        'En el bloque de integracion multimarcas se mencionan marcas como:',
+        ["ABB, Siemens, Schneider", "Oracle, SAP, Meta", "Nike, Adidas, Puma", "Tesla, SpaceX, X"],
+        "ABB, Siemens, Schneider"
+      );
+
+      // Servicios
+      const serviceNames = serviceCards.map(s => s.name);
+      serviceCards.forEach(s => {
+        add(
+          'Cual de estos servicios aparece en \"Capacidades EPC integrales\"?',
+          makeOptions(s.name, serviceNames.concat(["Asesoria legal", "Recursos humanos", "Logistica maritima"])),
+          s.name
+        );
+      });
+      serviceCards.forEach(s => {
+        s.bullets.forEach(b => {
+          add(
+            'El enunciado \"' + b + '\" corresponde a que servicio?',
+            makeOptions(s.name, serviceNames.concat(["Ninguno"])) ,
+            s.name
+          );
+        });
+      });
+
+      // Catalogo
+      catalogTabs.forEach(tab => {
+        add(
+          'Cual de estas categorias aparece en las tabs del catalogo completo?',
+          makeOptions(tab, catalogTabs.concat(["Finanzas", "Comercial", "Compras"])),
+          tab
+        );
+      });
+      add(
+        'Que texto resume la seccion de servicios y especialidades?',
+        ["Encuentra exactamente lo que necesitas.", "Ahorra en cada compra.", "Solo productos en promocion.", "Todo para oficina."],
+        "Encuentra exactamente lo que necesitas."
+      );
+      add(
+        'En el catalogo, la busqueda rapida sugiere terminos como:',
+        ["subestaciones, MT, pruebas, SCADA, solar", "nomina, SAT, ISR, CFDI", "hotel, vuelo, auto", "ropa, talla, color"],
+        "subestaciones, MT, pruebas, SCADA, solar"
+      );
+
+      // Proyectos por sector
+      const sectors = ["Oil & Gas", "Infraestructura Electrica", "Soluciones Industriales", "No aparece"];
+      projects.forEach(p => {
+        add(
+          'A que sector pertenece el proyecto \"' + p.title + '\"?',
+          makeOptions(p.sector, sectors),
+          p.sector
+        );
+      });
+
+      // Capacidad tecnica (data dinamica)
+      const cvKeys = Object.keys(cvData);
+      cvKeys.forEach(k => {
+        add(
+          'En la vista dinamica, cual es la etiqueta correcta para \"' + k + '\"?',
+          makeOptions(cvData[k].label, cvKeys.map(x => cvData[x].label).concat(["Sector financiero"])),
+          cvData[k].label
+        );
+      });
+      cvKeys.forEach(k => {
+        const d = cvData[k];
+        add(
+          'Para \"' + d.label + '\", cuantas soluciones Electricas se muestran?',
+          makeOptions(String(d.electricas), cvKeys.map(x => String(cvData[x].electricas)).concat(["999"])),
+          String(d.electricas)
+        );
+      });
+      cvKeys.forEach(k => {
+        const d = cvData[k];
+        add(
+          'Para \"' + d.label + '\", cuantas soluciones de Automatizacion y Control se muestran?',
+          makeOptions(String(d.automatizacion), cvKeys.map(x => String(cvData[x].automatizacion)).concat(["999"])),
+          String(d.automatizacion)
+        );
+      });
+
+      // Preguntas extra de consistencia
+      add('En la navegacion, el CTA destacado es:', ["Registro", "Blog", "FAQ", "Descargas"], "Registro");
+      add('En el hero, el texto principal incluye la frase:', ["Socio estrategico EPC", "Marketplace digital", "Sistema ERP", "Canal retail"], "Socio estrategico EPC");
+      add('La seccion de alcance menciona soporte para proyectos EPC con:', ["logistica, ingenieria y soporte en sitio", "solo soporte remoto", "solo venta de equipos", "unicamente consultoria legal"], "logistica, ingenieria y soporte en sitio");
+      add('El bloque de suministro especializado se describe como:', ["Catalogo por marca y producto con filtros por servicio", "Subasta de maquinaria", "Tienda de consumo", "Portal de empleo"], "Catalogo por marca y producto con filtros por servicio");
+
+      return qs;
+    }
+
+    let questionBank = buildQuestionBank();
+    let currentAttempt = 0;
+    let usedQuestionIds = new Set();
+    let currentQuestions = [];
+    let history = [];
+    let participant = null;
+
+    const registerForm = document.getElementById("registerForm");
+    const candidateName = document.getElementById("candidateName");
+    const candidateEmail = document.getElementById("candidateEmail");
+    const registerText = document.getElementById("registerText");
+    const attemptChip = document.getElementById("attemptChip");
+    const bankChip = document.getElementById("bankChip");
+    const usedChip = document.getElementById("usedChip");
+    const participantChip = document.getElementById("participantChip");
+    const statusText = document.getElementById("statusText");
+    const startBtn = document.getElementById("startBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const quizPanel = document.getElementById("quizPanel");
+    const quizTitle = document.getElementById("quizTitle");
+    const quizForm = document.getElementById("quizForm");
+    const submitBtn = document.getElementById("submitBtn");
+
+    const resultPanel = document.getElementById("resultPanel");
+    const resultText = document.getElementById("resultText");
+    const resultList = document.getElementById("resultList");
+    const historyWrap = document.getElementById("historyWrap");
+    const mailBtn = document.getElementById("mailBtn");
+    const mailHint = document.getElementById("mailHint");
+    const blockedDomains = new Set([
+      "gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "icloud.com",
+      "live.com", "aol.com", "proton.me", "protonmail.com", "gmx.com"
+    ]);
+    const RESULT_EMAIL_TO = "hdiaz@vmsenergy.com";
+
+    function getEmailDomain(email) {
+      const parts = String(email || "").toLowerCase().trim().split("@");
+      return parts.length === 2 ? parts[1] : "";
+    }
+
+    function isCorporateEmail(email) {
+      const value = String(email || "").toLowerCase().trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value)) return false;
+      const domain = getEmailDomain(value);
+      return !!domain && !blockedDomains.has(domain);
+    }
+
+    function updateParticipantChip() {
+      if (!participant) {
+        participantChip.textContent = "Participante: sin registro";
+        return;
+      }
+      participantChip.textContent = "Participante: " + participant.name + " (" + participant.email + ")";
+    }
+
+    function hasRequiredBankSize() {
+      return questionBank.length >= ATTEMPTS_MAX * QUESTIONS_PER_ATTEMPT;
+    }
+
+    function updateStatus() {
+      attemptChip.textContent = "Oportunidad " + currentAttempt + " de " + ATTEMPTS_MAX;
+      bankChip.textContent = "Banco: " + questionBank.length + " preguntas";
+      usedChip.textContent = "Usadas: " + usedQuestionIds.size;
+      updateParticipantChip();
+    }
+
+    function setError(message) {
+      statusText.innerHTML = '<span class="bad">' + message + '</span>';
+      startBtn.disabled = true;
+      nextBtn.disabled = true;
+    }
+
+    function handleRegister(event) {
+      event.preventDefault();
+      const name = candidateName.value.replace(/\s+/g, " ").trim();
+      const email = candidateEmail.value.trim().toLowerCase();
+
+      if (!name || name.length < 3) {
+        registerText.innerHTML = '<span class="bad">Ingresa un nombre valido (minimo 3 caracteres).</span>';
+        startBtn.disabled = true;
+        return;
+      }
+      if (!isCorporateEmail(email)) {
+        registerText.innerHTML = '<span class="bad">Ingresa un correo empresarial valido (no correo personal).</span>';
+        startBtn.disabled = true;
+        return;
+      }
+
+      participant = { name, email };
+      registerText.innerHTML = '<span class="ok">Registro guardado para ' + name + '.</span>';
+      if (hasRequiredBankSize()) {
+        statusText.innerHTML = '<span class="ok">Registro completado. Ya puedes iniciar la oportunidad 1.</span>';
+        startBtn.disabled = false;
+      } else {
+        statusText.innerHTML = '<span class="bad">Registro completado, pero no hay suficientes preguntas para 3 oportunidades.</span>';
+        startBtn.disabled = true;
+      }
+      updateStatus();
+    }
+
+    function pickQuestions() {
+      const available = questionBank.filter(q => !usedQuestionIds.has(q.id));
+      if (available.length < QUESTIONS_PER_ATTEMPT) return null;
+      const selected = shuffle(available).slice(0, QUESTIONS_PER_ATTEMPT);
+      selected.forEach(q => usedQuestionIds.add(q.id));
+      return selected;
+    }
+
+    function renderQuiz() {
+      quizForm.innerHTML = "";
+      currentQuestions.forEach((q, i) => {
+        const fs = document.createElement("fieldset");
+        const lg = document.createElement("legend");
+        lg.textContent = (i + 1) + ". " + q.question;
+        fs.appendChild(lg);
+
+        q.options.forEach((opt, j) => {
+          const id = "q" + i + "_" + j;
+          const row = document.createElement("label");
+          row.className = "opt";
+          row.setAttribute("for", id);
+          row.innerHTML = '<input type="radio" name="q' + i + '" id="' + id + '" value="' + opt.replace(/"/g, '&quot;') + '"><span>' + opt + '</span>';
+          fs.appendChild(row);
+        });
+
+        quizForm.appendChild(fs);
+      });
+      submitBtn.disabled = false;
+    }
+
+    function startAttempt() {
+      if (!participant) {
+        statusText.innerHTML = '<span class="warn">Primero completa el registro (nombre y correo empresarial).</span>';
+        return;
+      }
+
+      if (!submitBtn.disabled && currentQuestions.length && !quizPanel.classList.contains("hidden")) {
+        statusText.innerHTML = '<span class="warn">Primero califica la oportunidad actual.</span>';
+        return;
+      }
+
+      if (currentAttempt >= ATTEMPTS_MAX) {
+        statusText.innerHTML = '<span class="warn">Ya agotaste las 3 oportunidades.</span>';
+        return;
+      }
+
+      const selected = pickQuestions();
+      if (!selected) {
+        setError("No hay suficientes preguntas unicas para completar otra oportunidad.");
+        return;
+      }
+
+      currentAttempt += 1;
+      currentQuestions = selected;
+      quizTitle.textContent = "Oportunidad " + currentAttempt + " - 30 preguntas";
+      statusText.textContent = "Responde todas las preguntas y luego califica el intento.";
+
+      quizPanel.classList.remove("hidden");
+      resultPanel.classList.add("hidden");
+      nextBtn.classList.add("hidden");
+      startBtn.disabled = true;
+
+      renderQuiz();
+      updateStatus();
+      window.scrollTo({ top: quizPanel.offsetTop - 12, behavior: "smooth" });
+    }
+
+    function gradeAttempt() {
+      if (!currentQuestions.length) return;
+
+      const answers = [];
+      for (let i = 0; i < currentQuestions.length; i++) {
+        const checked = quizForm.querySelector('input[name="q' + i + '"]:checked');
+        if (!checked) {
+          statusText.innerHTML = '<span class="warn">Falta responder la pregunta ' + (i + 1) + '.</span>';
+          return;
+        }
+        answers.push(checked.value);
+      }
+
+      let score = 0;
+      const wrong = [];
+      currentQuestions.forEach((q, i) => {
+        if (answers[i] === q.answer) {
+          score += 1;
+        } else {
+          wrong.push({ idx: i + 1, user: answers[i], correct: q.answer });
+        }
+      });
+
+      const percent = Math.round((score / currentQuestions.length) * 100);
+      history.push({ attempt: currentAttempt, score, total: currentQuestions.length, percent });
+
+      resultText.innerHTML = "Participante: <strong>" + participant.name + "</strong> (" + participant.email + ")<br>Aciertos: <strong>" + score + " / " + currentQuestions.length + "</strong> (" + percent + "%).";
+      resultList.innerHTML = "";
+
+      wrong.slice(0, 8).forEach(w => {
+        const li = document.createElement("li");
+        li.textContent = "Pregunta " + w.idx + ": tu respuesta = " + w.user + " | correcta = " + w.correct;
+        resultList.appendChild(li);
+      });
+
+      if (wrong.length > 8) {
+        const li = document.createElement("li");
+        li.textContent = "... y " + (wrong.length - 8) + " errores mas.";
+        resultList.appendChild(li);
+      }
+
+      historyWrap.innerHTML = "<h3>Historial</h3><ul class='result-list'>" +
+        history.map(h => "<li>Oportunidad " + h.attempt + ": " + h.score + "/" + h.total + " (" + h.percent + "%)</li>").join("") +
+        "</ul>";
+
+      resultPanel.classList.remove("hidden");
+      statusText.innerHTML = "<span class='ok'>Intento " + currentAttempt + " calificado.</span>";
+      submitBtn.disabled = true;
+
+      if (currentAttempt < ATTEMPTS_MAX) {
+        nextBtn.classList.remove("hidden");
+      } else {
+        nextBtn.classList.add("hidden");
+        statusText.innerHTML = "<span class='ok'>Examen finalizado: usaste las 3 oportunidades.</span>";
+      }
+
+      window.scrollTo({ top: resultPanel.offsetTop - 12, behavior: "smooth" });
+    }
+
+    function buildMailPayload() {
+      if (!participant || !history.length) return null;
+      const now = new Date();
+      const stamp = now.toLocaleString("es-MX");
+      const last = history[history.length - 1];
+      const historyLines = history.map(h => {
+        return " - Oportunidad " + h.attempt + ": " + h.score + "/" + h.total + " (" + h.percent + "%)";
+      }).join("\n");
+
+      const subject = "Resultados examen VMS - " + participant.name;
+      const body =
+`Resultados del examen interactivo VMS Energy
+
+Participante: ${participant.name}
+Correo empresarial: ${participant.email}
+Fecha de envio: ${stamp}
+
+Ultimo intento:
+- Oportunidad ${last.attempt}: ${last.score}/${last.total} (${last.percent}%)
+
+Historial completo:
+${historyLines}
+`;
+      return { subject, body };
+    }
+
+    function sendResultsByMail() {
+      const payload = buildMailPayload();
+      if (!payload) {
+        mailHint.innerHTML = '<span class="warn">Primero registra y califica al menos una oportunidad.</span>';
+        return;
+      }
+      const href = "mailto:" + RESULT_EMAIL_TO +
+        "?subject=" + encodeURIComponent(payload.subject) +
+        "&body=" + encodeURIComponent(payload.body);
+      window.location.href = href;
+    }
+
+    function resetAll() {
+      questionBank = buildQuestionBank();
+      currentAttempt = 0;
+      usedQuestionIds = new Set();
+      currentQuestions = [];
+      history = [];
+
+      quizForm.innerHTML = "";
+      quizPanel.classList.add("hidden");
+      resultPanel.classList.add("hidden");
+      nextBtn.classList.add("hidden");
+      startBtn.disabled = !participant;
+      statusText.textContent = participant ? 'Pulsa "Iniciar oportunidad" para comenzar.' : 'Completa el registro para habilitar el examen.';
+      updateStatus();
+
+      if (!hasRequiredBankSize()) {
+        setError("El banco tiene " + questionBank.length + " preguntas y se requieren al menos " + (ATTEMPTS_MAX * QUESTIONS_PER_ATTEMPT) + ".");
+      }
+    }
+
+    registerForm.addEventListener("submit", handleRegister);
+    startBtn.addEventListener("click", startAttempt);
+    nextBtn.addEventListener("click", startAttempt);
+    submitBtn.addEventListener("click", gradeAttempt);
+    resetBtn.addEventListener("click", resetAll);
+    mailBtn.addEventListener("click", sendResultsByMail);
+
+    resetAll();
+  </script>
+</body>
+</html>
